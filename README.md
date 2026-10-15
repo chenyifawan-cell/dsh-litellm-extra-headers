@@ -17,13 +17,17 @@
 
 ## 安装
 
+已发布在 npm：`dsh-litellm-extra-headers@0.1.0`
+
 ```sh
+# npm（推荐）
+dsh plugin --profile web add dsh-litellm-extra-headers
+
 # 从本地目录（开发时推荐，link 安装，改动即时生效）
 dsh plugin --profile web add ./dsh-litellm-extra-headers
-
 # 从打包产物
 dsh plugin --profile web add ./dsh-litellm-extra-headers-0.1.0.tgz
-# 从 git 主机（需要 pnpm 放行构建脚本时才需要 allowBuilds；本包是纯 JS，无需构建）
+# 从 git 主机（本包是纯 JS，无需 pnpm 放行构建脚本）
 dsh plugin --profile web add github:chenyifawan-cell/dsh-litellm-extra-headers
 ```
 
@@ -85,6 +89,13 @@ npm run test:e2e  # 真机链路：本地 mock 上游 + 真实 dsh headless 跑�
 2. `npm run test:e2e`：起一个会记录请求体的本地 OpenAI 兼容上游，用 `dsh --profile headless --patch` 把 provider 指向它并挂上本插件，跑一轮真实会话。断言：命中的请求 body 里多出 `extra_headers`、值在整轮里稳定（同一个会话 id）、**对照组（去掉插件行）没有这个字段**，并且 `debugFile` 有 `event: "inject"` 记录。
 3. **换到能连到 LiteLLM 的那台机器上**（第 2 步用的是本地 mock 上游，不需要网络）再跑一轮，用 `debugFile` 确认日志里出现注入记录，且上游不再报缺少会话头。这一步验证的是 LiteLLM 自己的「body.extra_headers → 上游请求头」合并行为，只有真实网关能证明。
    对照实验：手动 `curl` 只带 HTTP 头、不带 `extra_headers` → 上游报错；body 里带 `extra_headers` → 通过。
+
+## 发布备忘（首次发布踩过的坑）
+
+1. **2FA 必须开**：npm 只支持安全密钥（Windows Hello 指纹/PIN 或 YubiKey），没有 Google Authenticator 那种 TOTP。
+2. **`npm publish` 要在真终端里跑**：npm 只在 stdin/stdout 都是 TTY 时才走「自动开浏览器 → 轮询授权 → 自动重试上传」那条路（`lib/utils/auth.js` 的 `otplease`）；管道化的非交互进程会直接抛 EOTP，而错误文本里的授权 URL 被 `@npmcli/redact` 打码，等于拿不到链接。
+3. **新包名会先进审核**：首次发布会先在 registry 上生成一个 `0.0.0-stage` 占位版本（"Temporary package placeholder for staged publishing"），真正的版本进入审核，CLI 只提示 `Your package is being processed`。几分钟后正式版本自动上线，`latest` 指向它，占位版留在历史里。期间 `npm stage list` 可能为空，不用慌。
+4. 发布前记得 `--registry=https://registry.npmjs.org`：本机若把 registry 指向 npmmirror 这类只读镜像，默认 `npm publish` 会打错源。
 
 ## 已知边界
 
