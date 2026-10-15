@@ -1,0 +1,38 @@
+# dsh-litellm-extra-headers layer.
+#
+# Adds one host plugin row that merges `extra_headers: { x-opencode-session: … }`
+# into the body of OpenAI-compatible /chat/completions POSTs whose provider and
+# upstream host are both listed below.
+#
+# `providers` and `hosts` ship EMPTY on purpose: an empty list keeps the plugin
+# inert, so installing this package can never make the harness send a field to a
+# gateway nobody named. Fill both in for your deployment:
+#
+#   providers: [gwds, go]                       # route keys of the calls to touch
+#   hosts: ["litellm.internal:4000"]            # upstream host[:port] allowed to receive it
+#
+# Full field reference (header / mode / value / debug / debugFile) is in
+# README.md and in the commented block below.
+- insert:
+    - id: litellm-extra-headers
+      name: dsh-litellm-extra-headers
+      config:
+        # LLM route keys (`options.provider`) whose calls may be rewritten.
+        providers: []
+        # Upstream `host[:port]` values allowed to receive the extra field.
+        # Schemes and paths are accepted and normalized, e.g.
+        # "http://litellm.internal:4000/v1" -> "litellm.internal:4000".
+        hosts: []
+        # Field name placed inside the request body's `extra_headers` object.
+        header: x-opencode-session
+        # session-id: reuse the DSH session id (stable across turns/restarts).
+        # uuid:       a process-stable random uuid per DSH session.
+        # fixed:      the literal `value` below.
+        mode: session-id
+        # Literal used by mode: fixed; loading fails when it is missing.
+        value: null
+        # Log every injection decision through ctx.logger.
+        debug: false
+        # Append one JSON line per decision (provider, model, session, host,
+        # path, event, reason) to this file.
+        debugFile: null

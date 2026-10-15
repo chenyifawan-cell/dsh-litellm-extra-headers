@@ -1,0 +1,53 @@
+{
+  "name": "dsh-litellm-extra-headers",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness plugin: inject an `extra_headers` entry into the OpenAI-compatible request BODY for model calls routed to listed providers and sent to listed upstream hosts — the only injection point that survives a LiteLLM relay, which drops client HTTP headers.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "cordis",
+    "litellm",
+    "extra_headers",
+    "proxy",
+    "session-affinity",
+    "x-opencode-session",
+    "llm"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "yhr",
+    "email": "chenyifawan@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chenyifawan-cell/dsh-litellm-extra-headers.git"
+  },
+  "homepage": "https://github.com/chenyifawan-cell/dsh-litellm-extra-headers",
+  "bugs": {
+    "url": "https://github.com/chenyifawan-cell/dsh-litellm-extra-headers/issues"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
